@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>DiamondHub · MLBB & PUBG Store</title>
+  <!-- Font Awesome & Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <!-- QRCode.js -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0b0e14;
+      color: #edf2f7;
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 0 1.5rem 2rem;
+    }
+    .main-container { max-width: 1400px; margin: 0 auto; }
+
+    /* ----- NAVIGATION ----- */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      padding: 1.4rem 0 1rem;
+      border-bottom: 1px solid #2a3744;
+      margin-bottom: 2rem;
+    }
+    .logo h1 {
+      font-weight: 700;
+      font-size: 2rem;
+      background: linear-gradient(135deg, #fbbf24, #f97316);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .nav-links { display: flex; gap: 2.2rem; font-weight: 500; }
+    .nav-links a {
+      color: #cbd5e1; text-decoration: none; font-size: 1.05rem;
+      display: flex; align-items: center; gap: 0.5rem; transition: 0.2s;
+    }
+    .nav-links a i { color: #fbbf24; }
+    .nav-links a:hover, .nav-links a.active { color: #fcd34d; }
+    .nav-links a.active { border-bottom: 2px solid #fbbf24; padding-bottom: 4px; }
+
+    /* ----- PAGE SECTIONS ----- */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* HOME PAGE */
+    .hero {
+      background: linear-gradient(145deg, #131e2a, #0f1820);
+      border-radius: 36px; padding: 3rem 2.5rem; margin-bottom: 2.5rem;
+      border: 1px solid #2e4b5e; display: flex; flex-wrap: wrap; align-items: center;
+    }
+    .hero-content h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero-highlight { color: #fbbf24; }
+    .game-selector {
+      display: flex; gap: 1.5rem; margin: 2rem 0;
+    }
+    .game-card {
+      background: #131a24; border-radius: 28px; padding: 2rem; flex:1;
+      border: 2px solid #2a3744; cursor: pointer; transition: 0.2s;
+      text-align: center;
+    }
+    .game-card:hover { border-color: #fbbf24; }
+    .game-card i { font-size: 3rem; margin-bottom: 1rem; }
+    .game-card.mlbb i { color: #fbbf24; }
+    .game-card.pubg i { color: #f87171; }
+    .currency-logo {
+      display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+      margin-top: 0.5rem;
+    }
+
+    /* SHOP PAGES (MLBB & PUBG separate) */
+    .shop-header { display: flex; justify-content: space-between; margin-bottom: 1.8rem; }
+    .step-badge {
+      background: #1e2a36; padding: 0.4rem 1.4rem; border-radius: 40px;
+      font-weight: 600; border-left: 4px solid #fbbf24;
+    }
+    .product-panel {
+      background: #131a24; border-radius: 28px; padding: 1.8rem 1.5rem;
+      border: 1px solid #2a3744; margin-bottom: 1.8rem;
+    }
+    .mlbb-panel { border-top: 5px solid #fbbf24; }
+    .pubg-panel { border-top: 5px solid #f87171; }
+    .panel-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
+    .panel-header h2 { display: flex; align-items: center; gap: 0.6rem; }
+    .currency-badge {
+      display: flex; align-items: center; gap: 0.3rem; background: #1f2a36;
+      padding: 0.3rem 1rem; border-radius: 40px;
+    }
+    .options-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr));
+      gap: 0.8rem; margin-bottom: 1.5rem;
+    }
+    .option-card {
+      background: #1a232e; border: 1.5px solid #2e3b47; border-radius: 20px;
+      padding: 1rem 0.3rem; text-align: center; cursor: pointer;
+    }
+    .option-card.selected { border-color: #fbbf24; background: #1f2c3c; }
+    .pubg-panel .option-card.selected { border-color: #f87171; }
+    .option-amount { font-weight: 700; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; gap: 0.2rem; }
+    .mlbb-panel .option-amount { color: #fcd34d; }
+    .pubg-panel .option-amount { color: #fca5a5; }
+    .player-id-input input {
+      width: 100%; background: #0f171f; border: 1.5px solid #334155;
+      border-radius: 20px; padding: 0.9rem 1rem; color: white; margin-top: 0.3rem;
+    }
+    .proceed-btn {
+      background: #fbbf24; color: #0b0e14; border: none; padding: 1rem 2.5rem;
+      border-radius: 60px; font-weight: 700; font-size: 1.2rem; cursor: pointer;
+      width: 100%; margin-top: 1.8rem;
+    }
+
+    /* PAYMENT PAGE */
+    .payment-layout {
+      display: grid; grid-template-columns: 1.2fr 0.9fr; gap: 2rem;
+    }
+    .summary-box {
+      background: #10171f; border-radius: 32px; padding: 2rem; border: 1px solid #2a3a48;
+    }
+    .qr-panel {
+      background: #10171f; border-radius: 32px; padding: 2rem; border: 1px solid #2a3a48;
+      text-align: center;
+    }
+    #qrCanvas { width: 240px; height: 240px; background: white; border-radius: 20px; padding: 8px; margin: 1rem auto; }
+    .back-shop-btn {
+      background: transparent; border: 1.5px solid #4b5563; color: #e5e7eb;
+      padding: 0.8rem 1.5rem; border-radius: 40px; cursor: pointer; margin-top: 1rem;
+    }
+
+    @media (max-width: 800px) { .payment-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="main-container">
+
+  <!-- NAVIGATION -->
+  <nav class="navbar">
+    <div class="logo">
+      <h1><i class="fas fa-gem" style="color: #fbbf24;"></i> DiamondHub</h1>
+    </div>
+    <div class="nav-links">
+      <a href="#" class="nav-link active" data-page="home"><i class="fas fa-home"></i> Home</a>
+      <a href="#" class="nav-link" data-page="mlbbShop"><i class="fas fa-crown"></i> MLBB Store</a>
+      <a href="#" class="nav-link" data-page="pubgShop"><i class="fas fa-skull"></i> PUBG Store</a>
+      <a href="#" class="nav-link" data-page="payment"><i class="fas fa-credit-card"></i> Payment</a>
+    </div>
+  </nav>
+
+  <!-- ========== HOME PAGE ========= -->
+  <div id="homePage" class="page active">
+    <div class="hero">
+      <div class="hero-content">
+        <h2>Top up <span class="hero-highlight">MLBB Diamonds</span><br>& <span class="hero-highlight">PUBG UC</span> instantly</h2>
+        <p style="font-size:1.2rem; color:#b0bec5;">Secure UPI · Auto QR · 24/7 delivery</p>
+      </div>
+    </div>
+    <div class="game-selector">
+      <div class="game-card mlbb" id="selectMlbbHome">
+        <i class="fas fa-crown"></i>
+        <h2>Mobile Legends</h2>
+        <div class="currency-logo">
+          <i class="fas fa-gem" style="color:#fbbf24;"></i> 
+          <span>Diamonds</span>
+        </div>
+      </div>
+      <div class="game-card pubg" id="selectPubgHome">
+        <i class="fas fa-skull"></i>
+        <h2>PUBG Mobile</h2>
+        <div class="currency-logo">
+          <i class="fas fa-coins" style="color:#fca5a5;"></i>
+          <span>Unknown Cash</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MLBB SHOP PAGE (separate) ========= -->
+  <div id="mlbbShopPage" class="page">
+    <div class="shop-header">
+      <h2><i class="fas fa-crown" style="color:#fbbf24;"></i> MLBB Diamond Shop</h2>
+      <span class="step-badge">Step 1 & 2</span>
+    </div>
+    <div class="product-panel mlbb-panel">
+      <div class="panel-header">
+        <h2>
+          <i class="fas fa-gem" style="color:#fbbf24;"></i> Mobile Legends
+          <span class="currency-badge"><i class="fas fa-gem" style="color:#fbbf24;"></i> Diamonds</span>
+        </h2>
+      </div>
+      <div class="options-grid" id="mlbbOptions"></div>
+      <div class="player-id-input">
+        <label><i class="fas fa-id-card"></i> MLBB ID + Server</label>
+        <input type="text" id="mlbbPlayerId" placeholder="123456789 (1234)" value="881234567 (2188)">
+      </div>
+      <button class="proceed-btn" id="mlbbProceedBtn"><i class="fas fa-arrow-right"></i> Proceed to payment</button>
+    </div>
+  </div>
+
+  <!-- ========== PUBG SHOP PAGE (separate) ========= -->
+  <div id="pubgShopPage" class="page">
+    <div class="shop-header">
+      <h2><i class="fas fa-skull" style="color:#f87171;"></i> PUBG UC Shop</h2>
+      <span class="step-badge">Step 1 & 2</span>
+    </div>
+    <div class="product-panel pubg-panel">
+      <div class="panel-header">
+        <h2>
+          <i class="fas fa-coins" style="color:#fca5a5;"></i> PUBG Mobile
+          <span class="currency-badge"><i class="fas fa-coins" style="color:#fca5a5;"></i> Unknown Cash</span>
+        </h2>
+      </div>
+      <div class="options-grid" id="pubgOptions"></div>
+      <div class="player-id-input">
+        <label><i class="fas fa-user"></i> Character ID</label>
+        <input type="text" id="pubgPlayerId" placeholder="512345678" value="512398765">
+      </div>
+      <button class="proceed-btn" id="pubgProceedBtn"><i class="fas fa-arrow-right"></i> Proceed to payment</button>
+    </div>
+  </div>
+
+  <!-- ========== PAYMENT PAGE (unified) ========= -->
+  <div id="paymentPage" class="page">
+    <div class="payment-layout">
+      <div class="summary-box">
+        <h2 style="margin-bottom:1.5rem;"><i class="fas fa-receipt"></i> Order summary</h2>
+        <div style="background:#1a2530; border-radius:20px; padding:1.5rem;">
+          <p style="color:#9ca3af;">Game</p>
+          <h3 id="payGameLabel">MLBB <i class="fas fa-gem" style="color:#fbbf24; margin-left:0.3rem;"></i></h3>
+          <p style="color:#9ca3af; margin-top:1rem;">Item</p>
+          <h3 id="payItemLabel">86 Diamonds</h3>
+          <p style="color:#9ca3af; margin-top:1rem;">Player ID</p>
+          <h3 id="payPlayerId">881234567 (2188)</h3>
+          <hr style="border-color:#334155; margin:1.5rem 0;">
+          <p style="font-size:2rem; font-weight:700; color:#fcd34d;" id="payAmount">₹ 79</p>
+        </div>
+        <button class="back-shop-btn" id="backToShopBtn"><i class="fas fa-chevron-left"></i> Edit selection</button>
+      </div>
+      <div class="qr-panel">
+        <h2><i class="fas fa-qrcode"></i> Scan to pay</h2>
+        <canvas id="qrCanvas" width="240" height="240"></canvas>
+        <p><i class="fas fa-mobile-alt"></i> UPI / any wallet</p>
+        <p style="font-size:0.9rem; margin-top:1rem;">diamondhub@okhdfc</p>
+        <button class="refresh-qr-btn" id="refreshPaymentQr" style="background:#2563eb20; border:1px solid #3b82f6; color:#93c5fd; padding:0.6rem 1.5rem; border-radius:40px; margin-top:1rem;"><i class="fas fa-sync-alt"></i> Refresh QR</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+    // ---------- DATA (separated games) ----------
+    const mlbbProducts = [
+      { amount: 86, label: '86 Diamonds', price: 79 },
+      { amount: 172, label: '172 Diamonds', price: 149 },
+      { amount: 257, label: '257 Diamonds', price: 219 },
+      { amount: 344, label: '344 Diamonds', price: 289 },
+      { amount: 429, label: '429 Diamonds', price: 359 },
+      { amount: 514, label: '514 Diamonds', price: 429 },
+      { amount: 706, label: '706 Diamonds', price: 599 },
+      { amount: 878, label: '878 Diamonds', price: 749 }
+    ];
+    const pubgProducts = [
+      { amount: 60, label: '60 UC', price: 79 },
+      { amount: 300, label: '300 UC', price: 379 },
+      { amount: 600, label: '600 UC', price: 749 },
+      { amount: 1500, label: '1500 UC', price: 1849 },
+      { amount: 3000, label: '3000 UC', price: 3649 },
+      { amount: 6000, label: '6000 UC', price: 7249 }
+    ];
+
+    // state
+    let activeGame = 'MLBB';        // 'MLBB' or 'PUBG'
+    let selectedMlbbIdx = 0;
+    let selectedPubgIdx = 0;
+
+    // DOM elements
+    const mlbbContainer = document.getElementById('mlbbOptions');
+    const pubgContainer = document.getElementById('pubgOptions');
+    const mlbbIdInput = document.getElementById('mlbbPlayerId');
+    const pubgIdInput = document.getElementById('pubgPlayerId');
+    const qrCanvas = document.getElementById('qrCanvas');
+
+    const payGame = document.getElementById('payGameLabel');
+    const payItem = document.getElementById('payItemLabel');
+    const payPlayer = document.getElementById('payPlayerId');
+    const payAmount = document.getElementById('payAmount');
+
+    // Pages
+    const pages = {
+      home: document.getElementById('homePage'),
+      mlbbShop: document.getElementById('mlbbShopPage'),
+      pubgShop: document.getElementById('pubgShopPage'),
+      payment: document.getElementById('paymentPage')
+    };
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    // Buttons
+    const selectMlbbHome = document.getElementById('selectMlbbHome');
+    const selectPubgHome = document.getElementById('selectPubgHome');
+    const mlbbProceedBtn = document.getElementById('mlbbProceedBtn');
+    const pubgProceedBtn = document.getElementById('pubgProceedBtn');
+    const backToShopBtn = document.getElementById('backToShopBtn');
+    const refreshPaymentBtn = document.getElementById('refreshPaymentQr');
+
+    function formatPrice(p) { return `₹ ${p}`; }
+
+    // Render shop cards with currency logo
+    function renderShopCards() {
+      // MLBB
+      mlbbContainer.innerHTML = ''; 
+      mlbbProducts.forEach((p,i) => {
+        const card = document.createElement('div');
+        card.className = `option-card ${i===selectedMlbbIdx && activeGame==='MLBB' ? 'selected' : ''}`;
+        card.dataset.game='mlbb'; card.dataset.index=i;
+        card.innerHTML = `
+          <div class="option-amount">
+            <i class="fas fa-gem" style="color:#fbbf24; font-size:1rem;"></i> ${p.amount}
+          </div>
+          <div class="option-label">${p.label}</div>
+          <div class="option-price">${formatPrice(p.price)}</div>`;
+        card.addEventListener('click', ()=>{
+          activeGame='MLBB'; selectedMlbbIdx=i; updateShopSelection();
+        });
+        mlbbContainer.appendChild(card);
+      });
+      // PUBG
+      pubgContainer.innerHTML = '';
+      pubgProducts.forEach((p,i) => {
+        const card = document.createElement('div');
+        card.className = `option-card ${i===selectedPubgIdx && activeGame==='PUBG' ? 'selected' : ''}`;
+        card.dataset.game='pubg'; card.dataset.index=i;
+        card.innerHTML = `
+          <div class="option-amount">
+            <i class="fas fa-coins" style="color:#fca5a5; font-size:1rem;"></i> ${p.amount}
+          </div>
+          <div class="option-label">${p.label}</div>
+          <div class="option-price">${formatPrice(p.price)}</div>`;
+        card.addEventListener('click', ()=>{
+          activeGame='PUBG'; selectedPubgIdx=i; updateShopSelection();
+        });
+        pubgContainer.appendChild(card);
+      });
+    }
+
+    function updateShopSelection() {
+      document.querySelectorAll('.option-card').forEach(c => {
+        const g = c.dataset.game; const idx = parseInt(c.dataset.index);
+        if(g==='mlbb') c.classList.toggle('selected', activeGame==='MLBB' && idx===selectedMlbbIdx);
+        else if(g==='pubg') c.classList.toggle('selected', activeGame==='PUBG' && idx===selectedPubgIdx);
+      });
+    }
+
+    function getCurrentSelection() {
+      let product, playerId;
+      if(activeGame==='MLBB'){
+        product = mlbbProducts[selectedMlbbIdx];
+        playerId = mlbbIdInput.value.trim() || '881234567 (2188)';
+      } else {
+        product = pubgProducts[selectedPubgIdx];
+        playerId = pubgIdInput.value.trim() || '512398765';
+      }
+      return { product, playerId, game: activeGame };
+    }
+
+    function updatePaymentPage() {
+      const { product, playerId, game } = getCurrentSelection();
+      const currencyIcon = game === 'MLBB' ? '<i class="fas fa-gem" style="color:#fbbf24; margin-left:0.3rem;"></i>' : '<i class="fas fa-coins" style="color:#fca5a5; margin-left:0.3rem;"></i>';
+      payGame.innerHTML = `${game} ${currencyIcon}`;
+      payItem.textContent = product.label;
+      payPlayer.textContent = playerId;
+      payAmount.textContent = formatPrice(product.price);
+      
+      const upi = 'diamondhub@okhdfcbank';
+      const desc = `${game} ${product.label} ${playerId}`.substring(0,60);
+      const qrString = `upi://pay?pa=${upi}&pn=DiamondHub&am=${product.price}&cu=INR&tn=${encodeURIComponent(desc)}`;
+      if(qrCanvas) {
+        QRCode.toCanvas(qrCanvas, qrString, { width: 240 }).catch(e=>console.warn);
+      }
+    }
+
+    function showPage(pageId) {
+      Object.keys(pages).forEach(id => pages[id].classList.remove('active'));
+      pages[pageId].classList.add('active');
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if(link.dataset.page === pageId) link.classList.add('active');
+      });
+      if(pageId === 'payment') updatePaymentPage();
+      if(pageId === 'mlbbShop') { activeGame = 'MLBB'; updateShopSelection(); }
+      if(pageId === 'pubgShop') { activeGame = 'PUBG'; updateShopSelection(); }
+    }
+
+    // Event listeners
+    selectMlbbHome.addEventListener('click', ()=>{ activeGame='MLBB'; showPage('mlbbShop'); });
+    selectPubgHome.addEventListener('click', ()=>{ activeGame='PUBG'; showPage('pubgShop'); });
+    
+    mlbbProceedBtn.addEventListener('click', ()=>{ activeGame='MLBB'; showPage('payment'); });
+    pubgProceedBtn.addEventListener('click', ()=>{ activeGame='PUBG'; showPage('payment'); });
+    
+    backToShopBtn.addEventListener('click', ()=>{
+      if(activeGame === 'MLBB') showPage('mlbbShop');
+      else showPage('pubgShop');
+    });
+    
+    refreshPaymentBtn.addEventListener('click', ()=> updatePaymentPage());
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = link.dataset.page;
+        if(page === 'mlbbShop') { activeGame='MLBB'; showPage('mlbbShop'); }
+        else if(page === 'pubgShop') { activeGame='PUBG'; showPage('pubgShop'); }
+        else if(page) showPage(page);
+      });
+    });
+
+    // ID inputs
+    mlbbIdInput.addEventListener('input', updateShopSelection);
+    pubgIdInput.addEventListener('input', updateShopSelection);
+
+    renderShopCards();
+    updateShopSelection();
+  })();
+</script>
+</body>
+</html>
